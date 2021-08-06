@@ -2,6 +2,7 @@ MENU = {
     "espresso": {
         "ingredients": {
             "water": 50,
+            "milk": 0,
             "coffee": 18,
         },
         "cost": 1.5,
@@ -32,6 +33,16 @@ resources = {
 }
 
 def insert_coins(required_cost):
+    """ 
+    Requests the user for input of number of:
+        quarters = $0.25 each
+        dimes = $0.10 each
+        nickles = $0.05 each
+        pennies = $0.01 each 
+    The function then compares this with the cost of the drink. If the user has not provided enough coins, then the transaction is cancelled.
+    If the user has provided more than the required cost, change is provided. 
+    """ 
+    
     cost_enough = True 
     change = 0 
     print('Please insert coins.')
@@ -59,7 +70,8 @@ def retrieve_ingredients(resources):
     milk = resources["milk"]
     coffee = resources["coffee"]
     water = resources["water"]
-    return water,milk,coffee
+    order_ingredients = [water,milk,coffee]
+    return order_ingredients
     
 def generate_report(resources):
     """Generates a report of the available resources for the coffee machine."""
@@ -88,23 +100,32 @@ while coffee_machine_on:
             print("Sorry that's not enough. Money refunded.")
         else:
             # Retrieve other dictionary entries for drink item
-            drink_water,drink_milk,drink_coffee = retrieve_ingredients(drink["ingredients"])
-            total_water,total_milk,total_coffee = retrieve_ingredients(resources)
-            total_money = resources["money"]
-            total_water -= drink_water
-            total_milk -= drink_milk
-            total_coffee -= drink_coffee
-            total_money += drink_cost 
-            resources["water"] = total_water
-            resources["milk"] = total_milk
-            resources["coffee"] = total_coffee
-            resources["money"] = total_money 
-            # Give the user change if there is any 
-            if change != 0:
-                print(f"Here is ${round(change,2)} in change.")
-            
-            # Print the drink that they received
-            print(f'Here is your {user_input}. Enjoy!')
+            order_ingredients = retrieve_ingredients(drink["ingredients"])
+            total_ingredients = retrieve_ingredients(resources)
+            # Change this code to check if there are enough resources to make the drink 
+            insufficient_items = False
+            resource_names = ["water","milk","coffee"]
+            for i in range(0,len(order_ingredients)):
+                if total_ingredients[i] - order_ingredients[i] < 0:
+                    print(f"Sorry, there is not enough {resource_names[i]} left.") 
+                    insufficient_items = True 
+        
+            if not insufficient_items:
+                # Deduct ingredients consumed and add money to resources
+                total_money = resources["money"]
+                for i in range(0,3):
+                    total_ingredients[i] -= order_ingredients[i]
+                total_money += drink_cost 
+                resources["water"] = total_ingredients[0]
+                resources["milk"] = total_ingredients[1]
+                resources["coffee"] = total_ingredients[2]
+                resources["money"] = total_money 
+                # Give the user change if there is any 
+                if change != 0:
+                    print(f"Here is ${round(change,2)} in change.")
+                
+                # Print the drink that they received
+                print(f'Here is your {user_input} ☕. Enjoy!')
             
     
     elif user_input == "report":
